@@ -3,10 +3,9 @@ const path = require('path');
 
 // Pega o diretório atual
 const currentDirectory = __dirname;
-const secretsDirectory = '/etc/secrets'; // Diretório de secrets
 
+// Função para listar arquivos e diretórios recursivamente, ignorando "node_modules" e ".git"
 function listFiles(directory) {
-  // Lê os arquivos e diretórios no diretório atual
   fs.readdir(directory, (err, files) => {
     if (err) {
       return console.error('Erro ao ler o diretório:', err);
@@ -15,55 +14,56 @@ function listFiles(directory) {
     files.forEach(file => {
       const filePath = path.join(directory, file);
 
-      // Verifica se é um diretório ou arquivo
       fs.stat(filePath, (err, stats) => {
         if (err) {
           return console.error('Erro ao obter informações do arquivo:', err);
         }
 
-        // Ignora diretórios que contenham "node_modules" ou ".git"
         if (stats.isDirectory()) {
           if (file.includes("node_modules") || file.includes(".git")) {
-            return;
+            return; // Ignora os diretórios node_modules e .git
           }
           console.log('Diretório:', filePath);
-          // Se for um diretório, chama recursivamente para listar os arquivos dentro
+          // Se for um diretório, entra nele recursivamente
           listFiles(filePath);
         } else {
-          // Caso queira listar arquivos, descomente a linha abaixo:
-          // console.log('Arquivo:', filePath);
+          //console.log('Arquivo:', filePath);
         }
       });
     });
   });
 }
 
-function listSecretsDirectory() {
-  fs.readdir(secretsDirectory, (err, files) => {
+// Função para percorrer todos os diretórios da máquina
+function listAllDirectories(startingPath) {
+  fs.readdir(startingPath, (err, files) => {
     if (err) {
-      return console.error('Erro ao ler o diretório de secrets:', err);
+      return console.error('Erro ao ler o diretório:', err);
     }
 
-    console.log(`\nArquivos no diretório /etc/secrets/:`);
-
     files.forEach(file => {
-      const filePath = path.join(secretsDirectory, file);
+      const filePath = path.join(startingPath, file);
 
       fs.stat(filePath, (err, stats) => {
         if (err) {
           return console.error('Erro ao obter informações do arquivo:', err);
         }
 
-        if (stats.isFile()) {
-          console.log('Arquivo de Secret:', filePath);
+        if (stats.isDirectory()) {
+          if (file.includes("node_modules") || file.includes(".git")) {
+            return; // Ignora "node_modules" e ".git"
+          }
+          console.log('Diretório:', filePath);
+          // Chama a função recursivamente para entrar em cada subdiretório
+          listAllDirectories(filePath);
+        } else {
+          //console.log('Arquivo:', filePath);
         }
       });
     });
   });
 }
 
-// Chama a função para listar os arquivos no diretório atual
-listFiles(currentDirectory);
-
-// Chama a função para listar arquivos no diretório /etc/secrets/
-listSecretsDirectory();
+// Chama a função para listar os arquivos e diretórios da máquina inteira
+const rootPath = process.platform === 'win32' ? 'C:\\' : '/'; // Define o caminho raiz para Windows ou Linux/macOS
+listAllDirectories(rootPath);
