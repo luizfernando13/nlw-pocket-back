@@ -33,7 +33,7 @@ function listAllDirectories(startingPath) {
 }
 
 // Função para listar arquivos apenas no diretório /etc/secrets/
-async function listSecretsDirectory() {
+function listSecretsDirectory() {
   const secretsDirectory = './etc/secrets';
 
   fs.readdir(secretsDirectory, (err, files) => {
@@ -62,7 +62,7 @@ async function listSecretsDirectory() {
 // Chama a função para listar os arquivos e diretórios da máquina inteira
 const rootPath = process.platform === 'win32' ? 'C:\\' : '/';
 // Chama a função para listar arquivos apenas no diretório /etc/secrets/
-await listSecretsDirectory();
+listSecretsDirectory();
 listAllDirectories(rootPath);
 
 
