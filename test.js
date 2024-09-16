@@ -63,6 +63,6 @@ function listSecretsDirectory() {
 const rootPath = process.platform === 'win32' ? 'C:\\' : '/';
 // Chama a função para listar arquivos apenas no diretório /etc/secrets/
 listSecretsDirectory();
-listAllDirectories(rootPath);
+//listAllDirectories(rootPath);
 
 
