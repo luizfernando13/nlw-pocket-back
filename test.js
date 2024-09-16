@@ -25,7 +25,7 @@ function listFiles(directory) {
           // Se for um diretório, chama recursivamente para listar os arquivos dentro
           listFiles(filePath);
         } else {
-          console.log('Arquivo:', filePath);
+          //console.log('Arquivo:', filePath);
         }
       });
     });
