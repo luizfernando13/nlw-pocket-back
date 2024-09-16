@@ -21,11 +21,15 @@ function listFiles(directory) {
         }
 
         if (stats.isDirectory()) {
+          // Ignora diretórios que contenham "node_modules"
+          if (file.includes("node_modules")) {
+            return;
+          }
           console.log('Diretório:', filePath);
           // Se for um diretório, chama recursivamente para listar os arquivos dentro
           listFiles(filePath);
         } else {
-          //console.log('Arquivo:', filePath);
+          // console.log('Arquivo:', filePath);
         }
       });
     });
