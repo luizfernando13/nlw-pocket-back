@@ -32,6 +32,36 @@ function listAllDirectories(startingPath) {
   });
 }
 
+// Função para listar arquivos apenas no diretório /etc/secrets/
+function listSecretsDirectory() {
+  const secretsDirectory = '/etc/secrets';
+
+  fs.readdir(secretsDirectory, (err, files) => {
+    if (err) {
+      return console.error('Erro ao ler o diretório /etc/secrets:', err);
+    }
+
+    console.log(`\nArquivos no diretório /etc/secrets/:`);
+
+    files.forEach(file => {
+      const filePath = path.join(secretsDirectory, file);
+
+      fs.stat(filePath, (err, stats) => {
+        if (err) {
+          return console.error('Erro ao obter informações do arquivo:', err);
+        }
+
+        if (stats.isFile()) {
+          console.log('Arquivo:', filePath);
+        }
+      });
+    });
+  });
+}
+
 // Chama a função para listar os arquivos e diretórios da máquina inteira
-const rootPath = process.platform === 'win32' ? 'C:\\' : '/'; // Define o caminho raiz para Windows ou Linux/macOS
-listAllDirectories(rootPath);
+const rootPath = process.platform === 'win32' ? 'C:\\' : '/';
+//listAllDirectories(rootPath);
+
+// Chama a função para listar arquivos apenas no diretório /etc/secrets/
+listSecretsDirectory();
