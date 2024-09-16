@@ -12,6 +12,7 @@ import { getWeekSummaryRoute } from "./routes/get-week-summary";
 import fastifyCors from "@fastify/cors";
 import { undoCompletionRoute } from "./routes/undo-completion";
 import { deleteGoalRoute } from "./routes/delete-goal";
+import { env } from '../env'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
