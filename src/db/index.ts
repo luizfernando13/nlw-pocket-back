@@ -1,31 +1,23 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import * as schema from "./schema";
-import { env } from "../env";
-import { seed } from './seed'; // Importa o seed
+import * as schema from "./schema"; // Importa o esquema das tabelas
+import { env } from "../env"; // Importa variáveis de ambiente
+import { createTablesAndSeed } from "./seed"; // Importa a função para criar as tabelas e executar o seed
 
-export const client = postgres(env.DATABASE_URL)
-export const db = drizzle(client, { schema, logger: true });
+export const client = postgres(env.DATABASE_URL); // Inicializa o cliente PostgreSQL
+export const db = drizzle(client, { schema, logger: true }); // Inicializa o Drizzle ORM
 
-async function createTablesAndSeed() {
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS goals (
-      id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
-      title TEXT NOT NULL,
-      desired_weekly_frequency INTEGER NOT NULL,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    );
-    
-    CREATE TABLE IF NOT EXISTS goal_completions (
-      id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
-      goal_id TEXT REFERENCES goals(id) ON DELETE CASCADE NOT NULL,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    );
-  `);
-
-  // Chama o seed para popular o banco de dados
-  await seed();
+async function initializeDatabase() {
+  try {
+    console.log("Criando tabelas e executando seeds...");
+    await createTablesAndSeed();
+    console.log("Tabelas criadas e seeds executados com sucesso.");
+  } catch (error) {
+    console.error("Erro ao criar tabelas ou executar seeds:", error);
+  } finally {
+    client.end(); // Finaliza a conexão com o banco de dados
+  }
 }
 
-// Chame a função para criar tabelas e executar o seed
-createTablesAndSeed().finally(() => client.end());
+// Inicializa o banco de dados quando o aplicativo começar
+initializeDatabase();
