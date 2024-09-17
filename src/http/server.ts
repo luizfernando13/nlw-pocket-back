@@ -34,9 +34,6 @@ app.register(deleteGoalRoute)
 
 
 
-console.log(env.PORT)
-console.log(env.DATABASE_URL)
-
 app.listen({
     port: env.PORT,
     host: '0.0.0.0',
