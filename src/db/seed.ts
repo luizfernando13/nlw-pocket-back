@@ -1,26 +1,55 @@
-import { date } from "drizzle-orm/mysql-core";
-import { client, db } from "."
-import { goalCompletions, goals } from "./schema"
-import dayjs from "dayjs";
+import { db } from "./index"; // Importa o `db` já inicializado
+import { goalCompletions, goals } from "./schema"; // Esquemas das tabelas
+import dayjs from "dayjs"; // Biblioteca para manipulação de datas
 
-async function seed() {
-    await db.delete(goalCompletions)
-    await db.delete(goals)
+// Função para criar as tabelas se não existirem
+async function createTables() {
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS goals (
+      id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+      title TEXT NOT NULL,
+      desired_weekly_frequency INTEGER NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
     
-    const result = await db.insert(goals).values([
-        { title: "Acordar cedo", desiredWeeklyFrequency: 5 },
-        { title: "Me exercitar", desiredWeeklyFrequency: 3 },
-        { title: "Meditar", desiredWeeklyFrequency: 1 }
-    ]).returning();
-    
-    const startOfWeek = dayjs().startOf('week')
-
-    await db.insert(goalCompletions).values([
-        { goalId: result[0].id, createdAt: startOfWeek.toDate() },
-        { goalId: result[1].id, createdAt: startOfWeek.add(1, 'day').toDate() }
-    ]);
+    CREATE TABLE IF NOT EXISTS goal_completions (
+      id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+      goal_id TEXT REFERENCES goals(id) ON DELETE CASCADE NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+  `);
 }
 
-seed().finally(() => {
-    client.end()
-})
+// Função que insere dados nas tabelas
+export async function seed() {
+  // Exclui todas as entradas existentes
+  await db.delete(goalCompletions);
+  await db.delete(goals);
+
+  // Insere novos registros
+  const result = await db
+    .insert(goals)
+    .values([
+      { title: "Acordar cedo", desiredWeeklyFrequency: 5 },
+      { title: "Me exercitar", desiredWeeklyFrequency: 3 },
+      { title: "Meditar", desiredWeeklyFrequency: 1 },
+    ])
+    .returning();
+
+  const startOfWeek = dayjs().startOf("week");
+
+  await db.insert(goalCompletions).values([
+    { goalId: result[0].id, createdAt: startOfWeek.toDate() },
+    { goalId: result[1].id, createdAt: startOfWeek.add(1, "day").toDate() },
+  ]);
+}
+
+// Função para criar tabelas e executar o seed
+export async function createTablesAndSeed() {
+  try {
+    await createTables(); // Cria as tabelas se elas não existirem
+    await seed(); // Popula o banco de dados com os dados iniciais
+  } catch (error) {
+    console.error("Erro ao criar tabelas ou executar seed:", error);
+  }
+}
