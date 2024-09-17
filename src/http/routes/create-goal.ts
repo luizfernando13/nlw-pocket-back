@@ -1,36 +1,40 @@
-import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import z from "zod";
 import { createGoal } from "../../functions/create-goal";
 
 export const createGoalRoute: FastifyPluginAsyncZod = async (app) => {
   app.post('/goals', {
     schema: {
-        body: z.object({
-            title: z.string(),
-            desiredWeeklyFrequency: z.number().int().min(1).max(7),
-    }),
+      body: z.object({
+        title: z.string(),
+        desiredWeeklyFrequency: z.number().int().min(1).max(7),
+      }),
     }
-}, async (request, reply) => {
+  }, async (request, reply) => {
     const { title, desiredWeeklyFrequency } = request.body;
 
-    // Adiciona um log para verificar se o back-end está recebendo a requisição
-    console.log('Requisição recebida no back-end:');
-    console.log('Título:', title);
-    console.log('Frequência semanal desejada:', desiredWeeklyFrequency);
+    console.log('Requisição recebida no back-end:', title, desiredWeeklyFrequency);
 
-    try {
-        // Processa a criação da meta
-        await createGoal({
-            title,
-            desiredWeeklyFrequency,
-        });
+    let attempt = 0;
+    const maxAttempts = 5;
 
-        // Retorna uma resposta de sucesso
+    while (attempt < maxAttempts) {
+      try {
+        // Tenta criar a meta no banco de dados
+        await createGoal({ title, desiredWeeklyFrequency });
         return reply.status(201).send({ message: 'Meta criada com sucesso!' });
-    } catch (error) {
-        // Loga o erro no console
-        console.error('Erro ao criar a meta:', error);
-        return reply.status(500).send({ message: 'Erro ao criar a meta', error: error.message });
+      } catch (error) {
+        attempt++;
+        console.error(`Erro ao criar a meta na tentativa ${attempt}:`, error);
+
+        if (attempt >= maxAttempts) {
+          return reply.status(500).send({
+            message: 'Erro ao criar a meta após múltiplas tentativas',
+            error: error.message,
+          });
+        }
+
+        // Espera um tempo antes de tentar novamente
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
     }
-});
+  });
 };
