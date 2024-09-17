@@ -1,10 +1,11 @@
+import { sql } from "postgres";
 import { db } from "./index"; // Importa o `db` já inicializado
 import { goalCompletions, goals } from "./schema"; // Esquemas das tabelas
 import dayjs from "dayjs"; // Biblioteca para manipulação de datas
 
 // Função para criar as tabelas se não existirem
-async function createTables() {
-  await db.execute(`
+async function createTables(client: any) {
+  await client`
     CREATE TABLE IF NOT EXISTS goals (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
       title TEXT NOT NULL,
@@ -17,7 +18,7 @@ async function createTables() {
       goal_id TEXT REFERENCES goals(id) ON DELETE CASCADE NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
-  `);
+  `;
 }
 
 // Função que insere dados nas tabelas
@@ -45,9 +46,9 @@ export async function seed() {
 }
 
 // Função para criar tabelas e executar o seed
-export async function createTablesAndSeed() {
+export async function createTablesAndSeed(client: any) {
   try {
-    await createTables(); // Cria as tabelas se elas não existirem
+    await createTables(client); // Cria as tabelas se elas não existirem
     await seed(); // Popula o banco de dados com os dados iniciais
   } catch (error) {
     console.error("Erro ao criar tabelas ou executar seed:", error);
