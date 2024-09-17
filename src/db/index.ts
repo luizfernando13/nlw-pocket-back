@@ -4,7 +4,13 @@ import * as schema from "./schema"; // Importa o esquema das tabelas
 import { env } from "../env"; // Importa variáveis de ambiente
 import { createTablesAndSeed } from "./seed"; // Importa a função para criar as tabelas e executar o seed
 
-export const client = postgres(env.DATABASE_URL); // Inicializa o cliente PostgreSQL
+export const client = postgres(env.DATABASE_URL, {
+  keep_alive: true,        // Habilita o keep-alive para evitar que a conexão seja encerrada prematuramente
+  idle_timeout: 0,         // Define que a conexão não será automaticamente encerrada por inatividade (sem timeout)
+  connect_timeout: 30,     // Define o tempo máximo de espera para estabelecer uma conexão como 30 segundos
+});
+
+
 export const db = drizzle(client, { schema, logger: true }); // Inicializa o Drizzle ORM
 
 async function initializeDatabase() {
