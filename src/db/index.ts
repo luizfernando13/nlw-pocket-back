@@ -5,10 +5,17 @@ import { env } from "../env"; // Importa variáveis de ambiente
 import { createTablesAndSeed } from "./seed"; // Importa a função para criar as tabelas e executar o seed
 
 export const client = postgres(env.DATABASE_URL, {
-  keep_alive: true,        // Habilita o keep-alive para evitar que a conexão seja encerrada prematuramente
-  idle_timeout: 0,         // Define que a conexão não será automaticamente encerrada por inatividade (sem timeout)
-  connect_timeout: 30,     // Define o tempo máximo de espera para estabelecer uma conexão como 30 segundos
+  keep_alive: true,
+  idle_timeout: 0,
+  connect_timeout: 30,
 });
+
+client`SELECT 1`.then(() => {
+  console.log('Conexão com o banco de dados estabelecida com sucesso!');
+}).catch((err) => {
+  console.error('Erro ao conectar no banco de dados:', err);
+});
+
 
 
 export const db = drizzle(client, { schema, logger: true }); // Inicializa o Drizzle ORM
