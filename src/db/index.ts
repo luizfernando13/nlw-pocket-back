@@ -20,7 +20,7 @@ client`SELECT 1`.then(() => {
 });
 
 // Inicializa o Drizzle ORM
-export const db = drizzle(client, { schema, logger: true });
+export const db = drizzle(client, { schema, logger: false });
 
 async function initializeDatabase() {
   try {
