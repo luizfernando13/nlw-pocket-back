@@ -1,23 +1,26 @@
-import { sql } from "postgres";
 import { db } from "./index"; // Importa o `db` já inicializado
 import { goalCompletions, goals } from "./schema"; // Esquemas das tabelas
 import dayjs from "dayjs"; // Biblioteca para manipulação de datas
 
 // Função para criar as tabelas se não existirem
 async function createTables(client: any) {
+  // Cria a tabela `goals`
   await client`
     CREATE TABLE IF NOT EXISTS goals (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
       title TEXT NOT NULL,
       desired_weekly_frequency INTEGER NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    );
-    
+    )
+  `;
+
+  // Cria a tabela `goal_completions`
+  await client`
     CREATE TABLE IF NOT EXISTS goal_completions (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
       goal_id TEXT REFERENCES goals(id) ON DELETE CASCADE NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    );
+    )
   `;
 }
 
