@@ -10,7 +10,7 @@ export const db = drizzle(client, { schema, logger: true }); // Inicializa o Dri
 async function initializeDatabase() {
   try {
     console.log("Criando tabelas e executando seeds...");
-    await createTablesAndSeed();
+    await createTablesAndSeed(client); // Passa o cliente diretamente
     console.log("Tabelas criadas e seeds executados com sucesso.");
   } catch (error) {
     console.error("Erro ao criar tabelas ou executar seeds:", error);
