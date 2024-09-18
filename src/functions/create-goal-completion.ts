@@ -57,7 +57,10 @@ export async function createGoalCompletion({
 
   const insertResult = await db
     .insert(goalCompletions)
-    .values({ goalId })
+    .values({
+      goalId,
+      createdAt: dayjs().tz("America/Sao_Paulo").toDate(), // Usar o fuso horário correto ao criar o timestamp
+    })
     .returning()
   const goalCompletion = insertResult[0]
 
