@@ -46,7 +46,7 @@ export async function seed() {
     ])
     .returning();
 
-  const startOfWeek = dayjs().tz("America/Sao_Paulo").startOf("week");
+  const startOfWeek = dayjs().startOf("week");
 
   await db.insert(goalCompletions).values([
     { goalId: result[0].id, createdAt: startOfWeek.toDate() },
