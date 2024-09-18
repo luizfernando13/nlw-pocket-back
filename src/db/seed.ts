@@ -37,6 +37,7 @@ export async function seed() {
       { title: "Acordar cedo", desiredWeeklyFrequency: 5 },
       { title: "Me exercitar", desiredWeeklyFrequency: 3 },
       { title: "Meditar", desiredWeeklyFrequency: 1 },
+      { title: "Não mexer no celular de noite", desiredWeeklyFrequency: 2 },
     ])
     .returning();
 
@@ -45,6 +46,7 @@ export async function seed() {
   await db.insert(goalCompletions).values([
     { goalId: result[0].id, createdAt: startOfWeek.toDate() },
     { goalId: result[1].id, createdAt: startOfWeek.add(1, "day").toDate() },
+    { goalId: result[3].id, createdAt: startOfWeek.add(2, "day").toDate() },
   ]);
 }
 
