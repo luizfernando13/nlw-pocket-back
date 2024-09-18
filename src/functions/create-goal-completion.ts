@@ -1,16 +1,16 @@
-import { and, count, eq, gte, lte, sql } from 'drizzle-orm';
-import { db } from '../db';
-import { goalCompletions, goals } from '../db/schema';
-import dayjs from 'dayjs';
+import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
+import { db } from '../db'
+import { goalCompletions, goals } from '../db/schema'
+import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.tz.setDefault('America/Sao_Paulo');
+dayjs.tz.setDefault("America/Sao_Paulo");
 
 interface CreateGoalCompletionRequest {
-  goalId: string;
+  goalId: string
 }
 
 export async function createGoalCompletion({
@@ -19,10 +19,9 @@ export async function createGoalCompletion({
   const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate();
   const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate();
 
-  // Converte para objeto Date mantendo o fuso horário correto
-  const nowTz = dayjs().tz('America/Sao_Paulo').toDate();
+  const nowTz = dayjs().tz('America/Sao_Paulo').format();  // Gera uma string com a data em UTC-3
 
-  console.log("Now (São Paulo):", nowTz); // Verifica se a data está no fuso horário de São Paulo como objeto Date
+  console.log("Now (São Paulo):", nowTz); // Com fuso horário, deverá estar em UTC-3
 
   const goalCompletionCounts = db.$with('goal_completion_counts').as(
     db
@@ -60,12 +59,12 @@ export async function createGoalCompletion({
     throw new Error('Goal Already completed this week!');
   }
 
-  // Insere a data como objeto Date (fuso horário UTC-3 ajustado corretamente)
+  // Agora salvando diretamente a data com o fuso horário correto em formato string
   const insertResult = await db
     .insert(goalCompletions)
     .values({
       goalId,
-      createdAt: nowTz, // Passa o valor como objeto Date
+      createdAt: nowTz,  // Salvando como string formatada em UTC-3
     })
     .returning();
 
