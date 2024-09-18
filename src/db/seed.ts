@@ -10,23 +10,23 @@ dayjs.extend(timezone);
 // Função para criar as tabelas se não existirem
 async function createTables(client: any) {
   // Cria a tabela goals
-  await client
+  await client`
     CREATE TABLE IF NOT EXISTS goals (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
       title TEXT NOT NULL,
       desired_weekly_frequency INTEGER NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
-  ;
+  `;
 
   // Cria a tabela goal_completions
-  await client
+  await client`
     CREATE TABLE IF NOT EXISTS goal_completions (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
       goal_id TEXT REFERENCES goals(id) ON DELETE CASCADE NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
-  ;
+  `;
 }
 
 // Função que insere dados nas tabelas
@@ -42,7 +42,7 @@ export async function seed() {
       { title: "Acordar cedo", desiredWeeklyFrequency: 5 },
       { title: "Me exercitar", desiredWeeklyFrequency: 3 },
       { title: "Meditar", desiredWeeklyFrequency: 1 },
-      { title: "Não mexer no celular de noite", desiredWeeklyFrequency: 2 },
+      { title: "Não usar celular a noite", desiredWeeklyFrequency: 2 },
     ])
     .returning();
 
