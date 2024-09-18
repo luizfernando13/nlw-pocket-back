@@ -2,12 +2,12 @@ import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
 import { db } from '../db'
 import { goalCompletions, goals } from '../db/schema'
 import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
-dayjs.extend(utc)
-dayjs.extend(timezone)
-dayjs.tz.setDefault("America/Sao_Paulo")
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("America/Sao_Paulo");
 
 interface CreateGoalCompletionRequest {
   goalId: string
@@ -16,9 +16,16 @@ interface CreateGoalCompletionRequest {
 export async function createGoalCompletion({
   goalId,
 }: CreateGoalCompletionRequest) {
-  // As datas de início e fim da semana devem ser geradas no fuso horário de São Paulo
-  const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate()
-  const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate()
+  const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate();
+  const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate();
+
+  const now = dayjs().toDate();
+  const now2 = dayjs();
+  const nowTz = dayjs().tz('America/Sao_Paulo').toDate();
+
+  console.log("Now (UTC):", now.toString()); // Sem fuso horário, deverá estar em UTC
+  console.log("Now (UTC) to date:", now2.toString()); // Sem fuso horário, deverá estar em UTC
+  console.log("Now (São Paulo):", nowTz); // Com fuso horário, deverá estar em UTC-3
 
   const goalCompletionCounts = db.$with('goal_completion_counts').as(
     db
@@ -35,7 +42,7 @@ export async function createGoalCompletion({
         )
       )
       .groupBy(goalCompletions.goalId)
-  )
+  );
 
   const result = await db
     .with(goalCompletionCounts)
@@ -48,26 +55,26 @@ export async function createGoalCompletion({
     .from(goals)
     .leftJoin(goalCompletionCounts, eq(goalCompletionCounts.goalId, goals.id))
     .where(eq(goals.id, goalId))
-    .limit(1)
+    .limit(1);
 
-  const { completionCount, desiredWeeklyFrequency } = result[0]
+  const { completionCount, desiredWeeklyFrequency } = result[0];
 
   if (completionCount >= desiredWeeklyFrequency) {
-    throw new Error('Goal Already completed this week!')
+    throw new Error('Goal Already completed this week!');
   }
 
   const insertResult = await db
     .insert(goalCompletions)
     .values({
       goalId,
-      createdAt: dayjs().tz('America/Sao_Paulo').toDate(), // Assegura que a data está no fuso de São Paulo
+      createdAt: nowTz,
     })
-    .returning()
-  
-  const goalCompletion = insertResult[0]
-  console.log(goalCompletion)
+    .returning();
+
+  const goalCompletion = insertResult[0];
+  console.log("Inserted Goal Completion:", goalCompletion);
 
   return {
     goalCompletion,
-  }
+  };
 }
