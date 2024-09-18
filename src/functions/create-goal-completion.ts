@@ -1,16 +1,16 @@
-import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
-import { db } from '../db'
-import { goalCompletions, goals } from '../db/schema'
-import dayjs from 'dayjs'
+import { and, count, eq, gte, lte, sql } from 'drizzle-orm';
+import { db } from '../db';
+import { goalCompletions, goals } from '../db/schema';
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.tz.setDefault("America/Sao_Paulo");
+dayjs.tz.setDefault('America/Sao_Paulo');
 
 interface CreateGoalCompletionRequest {
-  goalId: string
+  goalId: string;
 }
 
 export async function createGoalCompletion({
@@ -19,13 +19,9 @@ export async function createGoalCompletion({
   const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate();
   const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate();
 
-  const now = dayjs().toDate();
-  const now2 = dayjs();
-  const nowTz = dayjs().tz('America/Sao_Paulo').toDate();
+  const nowTz = dayjs().tz('America/Sao_Paulo').format(); // Usar .format() para manter o fuso horário correto como string
 
-  console.log("Now (UTC):", now.toString()); // Sem fuso horário, deverá estar em UTC
-  console.log("Now (UTC) to date:", now2.toString()); // Sem fuso horário, deverá estar em UTC
-  console.log("Now (São Paulo):", nowTz); // Com fuso horário, deverá estar em UTC-3
+  console.log('Now (São Paulo):', nowTz); // Verifica se o fuso horário está correto
 
   const goalCompletionCounts = db.$with('goal_completion_counts').as(
     db
@@ -63,16 +59,17 @@ export async function createGoalCompletion({
     throw new Error('Goal Already completed this week!');
   }
 
+  // Agora, o `createdAt` será uma string formatada no timezone de São Paulo (UTC-3)
   const insertResult = await db
     .insert(goalCompletions)
     .values({
       goalId,
-      createdAt: nowTz,
+      createdAt: nowTz, // Salva como string formatada
     })
     .returning();
 
   const goalCompletion = insertResult[0];
-  console.log("Inserted Goal Completion:", goalCompletion);
+  console.log('Inserted Goal Completion:', goalCompletion);
 
   return {
     goalCompletion,
