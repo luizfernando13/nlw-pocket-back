@@ -19,9 +19,10 @@ export async function createGoalCompletion({
   const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate();
   const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate();
 
-  const nowTz = dayjs().tz('America/Sao_Paulo').format();  // Gera uma string com a data em UTC-3
+  // Obtenha a data no fuso horário de São Paulo, mas converta para UTC antes de salvar
+  const nowTz = dayjs().tz('America/Sao_Paulo').utc().toDate();
 
-  console.log("Now (São Paulo):", nowTz); // Com fuso horário, deverá estar em UTC-3
+  console.log("Now (UTC):", nowTz); // Essa será a data que será salva no banco, convertida para UTC
 
   const goalCompletionCounts = db.$with('goal_completion_counts').as(
     db
@@ -59,12 +60,12 @@ export async function createGoalCompletion({
     throw new Error('Goal Already completed this week!');
   }
 
-  // Agora salvando diretamente a data com o fuso horário correto em formato string
+  // Agora salvando diretamente a data no formato UTC
   const insertResult = await db
     .insert(goalCompletions)
     .values({
       goalId,
-      createdAt: nowTz,  // Salvando como string formatada em UTC-3
+      createdAt: nowTz,  // Salvando como `Date` no fuso horário UTC (mesmo horário, diferente timezone)
     })
     .returning();
 
