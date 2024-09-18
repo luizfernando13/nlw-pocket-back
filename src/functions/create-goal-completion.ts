@@ -16,13 +16,13 @@ interface CreateGoalCompletionRequest {
 export async function createGoalCompletion({
   goalId,
 }: CreateGoalCompletionRequest) {
-  const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toISOString();
-  const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toISOString();
+  const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate();
+  const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate();
 
-  // Usa o formato ISO com fuso horário explícito
-  const nowTz = dayjs().tz('America/Sao_Paulo').format();
+  // Converte para objeto Date mantendo o fuso horário correto
+  const nowTz = dayjs().tz('America/Sao_Paulo').toDate();
 
-  console.log('Now (São Paulo):', nowTz); // Verifica se o fuso horário está correto
+  console.log("Now (São Paulo):", nowTz); // Verifica se a data está no fuso horário de São Paulo como objeto Date
 
   const goalCompletionCounts = db.$with('goal_completion_counts').as(
     db
@@ -60,17 +60,17 @@ export async function createGoalCompletion({
     throw new Error('Goal Already completed this week!');
   }
 
-  // Agora, o `createdAt` será uma string no formato ISO com o fuso horário explícito (-03:00)
+  // Insere a data como objeto Date (fuso horário UTC-3 ajustado corretamente)
   const insertResult = await db
     .insert(goalCompletions)
     .values({
       goalId,
-      createdAt: nowTz, // Salva como string com fuso horário explícito
+      createdAt: nowTz, // Passa o valor como objeto Date
     })
     .returning();
 
   const goalCompletion = insertResult[0];
-  console.log('Inserted Goal Completion:', goalCompletion);
+  console.log("Inserted Goal Completion:", goalCompletion);
 
   return {
     goalCompletion,
