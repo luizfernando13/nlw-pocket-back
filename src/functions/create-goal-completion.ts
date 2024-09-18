@@ -59,7 +59,7 @@ export async function createGoalCompletion({
     .insert(goalCompletions)
     .values({
       goalId,
-      createdAt: dayjs.utc().toDate()
+      createdAt: dayjs.toDate()
     })
     .returning()
   const goalCompletion = insertResult[0]
