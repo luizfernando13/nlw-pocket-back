@@ -62,7 +62,9 @@ export async function createGoalCompletion({
       createdAt: dayjs.utc().tz('America/Sao_Paulo').toDate(),
     })
     .returning()
+  
   const goalCompletion = insertResult[0]
+  console.log(goalCompletion)
 
   return {
     goalCompletion,
