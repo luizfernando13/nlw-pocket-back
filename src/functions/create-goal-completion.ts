@@ -16,11 +16,11 @@ interface CreateGoalCompletionRequest {
 export async function createGoalCompletion({
   goalId,
 }: CreateGoalCompletionRequest) {
-  const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate();
-  const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate();
+  const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toISOString();
+  const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toISOString();
 
-  // Mantém o fuso horário de São Paulo, mas converte para objeto Date, que o banco aceita
-  const nowTz = dayjs().tz('America/Sao_Paulo').toDate();
+  // Usa o formato ISO com fuso horário explícito
+  const nowTz = dayjs().tz('America/Sao_Paulo').format();
 
   console.log('Now (São Paulo):', nowTz); // Verifica se o fuso horário está correto
 
@@ -60,12 +60,12 @@ export async function createGoalCompletion({
     throw new Error('Goal Already completed this week!');
   }
 
-  // Agora, o `createdAt` será um objeto Date com o fuso horário correto
+  // Agora, o `createdAt` será uma string no formato ISO com o fuso horário explícito (-03:00)
   const insertResult = await db
     .insert(goalCompletions)
     .values({
       goalId,
-      createdAt: nowTz, // Salva como objeto Date
+      createdAt: nowTz, // Salva como string com fuso horário explícito
     })
     .returning();
 
