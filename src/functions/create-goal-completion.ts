@@ -2,12 +2,12 @@ import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
 import { db } from '../db'
 import { goalCompletions, goals } from '../db/schema'
 import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.tz.setDefault("America/Sao_Paulo");
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault("America/Sao_Paulo")
 
 interface CreateGoalCompletionRequest {
   goalId: string
@@ -16,8 +16,9 @@ interface CreateGoalCompletionRequest {
 export async function createGoalCompletion({
   goalId,
 }: CreateGoalCompletionRequest) {
-  const firstDayOfWeek = dayjs().startOf('week').toDate()
-  const lastDayOfWeek = dayjs().endOf('week').toDate()
+  // As datas de início e fim da semana devem ser geradas no fuso horário de São Paulo
+  const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate()
+  const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate()
 
   const goalCompletionCounts = db.$with('goal_completion_counts').as(
     db
@@ -59,7 +60,7 @@ export async function createGoalCompletion({
     .insert(goalCompletions)
     .values({
       goalId,
-      createdAt: dayjs().tz('America/Sao_Paulo').toDate(),
+      createdAt: dayjs().tz('America/Sao_Paulo').toDate(), // Assegura que a data está no fuso de São Paulo
     })
     .returning()
   
