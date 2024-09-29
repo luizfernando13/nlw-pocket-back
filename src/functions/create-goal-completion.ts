@@ -10,17 +10,21 @@ dayjs.extend(timezone);
 dayjs.tz.setDefault("America/Sao_Paulo");
 
 interface CreateGoalCompletionRequest {
-  goalId: string
+  goalId: string;
+  createdAt?: string; // Campo opcional para a data de conclusão
 }
 
 export async function createGoalCompletion({
   goalId,
+  createdAt, // Recebendo opcionalmente a data
 }: CreateGoalCompletionRequest) {
   const firstDayOfWeek = dayjs().startOf('week').tz('America/Sao_Paulo').toDate();
   const lastDayOfWeek = dayjs().endOf('week').tz('America/Sao_Paulo').toDate();
 
-  // Obtenha a data no fuso horário de São Paulo, mas converta para UTC antes de salvar
-  const nowTz = dayjs().tz('America/Sao_Paulo').utc().toDate();
+  // Verifica se o `createdAt` foi passado na requisição; se sim, utiliza, senão usa a data atual
+  const nowTz = createdAt
+    ? dayjs(createdAt).tz('America/Sao_Paulo').utc().toDate() // Converte o `createdAt` recebido para UTC
+    : dayjs().tz('America/Sao_Paulo').utc().toDate(); // Se não foi passado, usa a data atual
 
   console.log("Now (UTC):", nowTz); // Essa será a data que será salva no banco, convertida para UTC
 
